@@ -13,5 +13,6 @@ CHIP Not {
     OUT out;
 
     PARTS:
+    // What's cool about not: one logic gate, same input for a and b.
     Nand(a=in,b=in,out=out);
 }
