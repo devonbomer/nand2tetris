@@ -17,4 +17,32 @@ CHIP Mux4Way16 {
 
     PARTS:
     // Put your code here:
+     //bit one operations:
+    Or(a=sel[0], b=sel[1], out=cone);
+    Not(in=ctwo, out=cthree);
+    And(a=a, b=cthree, out=cmissed);
+
+    // bit two operations:
+    And(a=b, b=sel[1], out=cfour);
+    Not(in=sel[0],out=cfive);
+    And(a=cfour, b=cfive);
+
+    // Connect one OR two:
+    Or(a=cmissed, b=cfive, out=orone);
+
+    // bit three operations:
+    Not(in=sel[1], out=csix);
+    And(a=csix, b=sel[0], out=cseven);
+    And(a=c, b=cseven, out=ceight);
+
+    //bit four operations:
+    And(a=d, b=sel[0], out=cnine);
+    And(a=d, b=sel[1], out=cten);
+    And(a=cnine, b=cten, out=celeven);
+    
+    // three OR four:
+    Or(a=ceight, b=celeven, out=ortwo);
+
+    // Connect all ORs:
+    Or(a=orone, b=ortwo, out=out);
 }
