@@ -18,6 +18,24 @@ CHIP DMux4Way {
     PARTS:
     // Put your code here:
 
+    // Selector Logic: from right to left: index 0 is leftmost bit
+    Not(in=sel[0], out=outone);
+    Not(in=sel[1], out=outtwo);
+    And(a=outone, b=outtwo,out=andone);
+
+    And(a=outtwo, b=sel[0], out=andtwo);
+
+    And(a=outone, b=sel[1], out=andthree);
+
+    And(a=sel[0], b=sel[1], out=andfour);
+
+    //Inputs to Output pins
+    And(a=in, b=andone, out=a);
+    And(a=in, b=andtwo, out=b);
+    And(a=in, b=andthree, out=c);
+    And(a=in, b=andfour, out=d);
+    
+    
    
 
 

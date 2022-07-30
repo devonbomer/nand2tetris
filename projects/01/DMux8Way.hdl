@@ -16,5 +16,53 @@ CHIP DMux8Way {
     OUT a, b, c, d, e, f, g, h;
 
     PARTS:
-    // Put your code here:
+    // CONFIRMED can use numbers in variable names.
+
+    // 3 bit selector (2^8 possible combinations in power set by set theory)
+
+    // equivalent to 3-bit and:
+    // a
+    Not(in=sel[0], out=notsel0);
+    Not(in=sel[1], out=notsel1);
+    Not(in=sel[2], out=notsel2);
+    And(a=notsel0, b=notsel1, out=nots0s1);
+    And(a=nots0s1, b=notsel2, out=not3);
+    And(a=in, b=not3, out=a);
+
+    // And3(a=notsel0, b=notsel1, c=notsel2, out=not3);
+    // And(a=not3, b=in, out=a);
+
+    // b
+    And(a=notsel1, b=notsel2, out=intb);
+    And(a=intb, b=sel[0], out=bnots);
+    And(a=in, b=bnots, out=b);
+
+    // c
+    And(a=notsel0, b=notsel2, out=nots0s2);
+    And(a=sel[1], b=nots0s2, out=intcand);
+    And(a=intcand, b=in, out=c);
+    // and3(a=sel1, b=nots0s2, c=in, out=c);
+
+    // d
+    And(a=sel[0], b=sel[1], out=s0s1);
+    And(a=s0s1, b=notsel2, out=s0s1not2);
+    And(a=in, b=s0s1not2, out=d);
+
+    // e
+    And(a=nots0s1, b=sel[2], out=s2nots0s1);
+    And(a=in, b=s2nots0s1, out=e);
+
+    // f
+    And(a=sel[0], b=sel[2], out=s0s2);
+    And(a=notsel1, b=s0s2, out=intf);
+    And(a=in, b=intf, out=f);
+
+    // g
+    And(a=sel[1], b=sel[2], out=s1s2);
+    And(a=notsel0, b=s1s2, out=intg);
+    And(a=in, b=intg, out=g);
+
+    // h
+    And3(a=sel[0], b=sel[1], c=sel[2], out=all3);
+    And(a=in, b=all3, out=h);
 }
