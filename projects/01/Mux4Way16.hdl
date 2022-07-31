@@ -18,6 +18,8 @@ CHIP Mux4Way16 {
 
     PARTS:
 
+    /**
+    Without internalizing selector logic:
     Not(in=sel[0], out=selout);
     And(a=sel[1], b=sel[0], out=aone);
     And(a=sel[1], b=selout, out=atwo);
@@ -26,4 +28,12 @@ CHIP Mux4Way16 {
     Mux16(a[0..15]=a[0..15], b[0..15]=d[0..15], sel=aone, out[0..15]=v);
     Mux16(a[0..15]=b[0..15], b[0..15]=c[0..15], sel=atwo, out[0..15]=k);
     Mux16(a[0..15]=v, b[0..15]=k, sel=xorout, out[0..15]=out[0..15]);  
+
+    BUT LOGICALLY EQUIVALENT TO:
+    */
+
+    Mux16(a[0..15]=a[0..15], b[0..15]=b[0..15], sel=sel[0], out[0..15]=v);
+    Mux16(a[0..15]=c[0..15], b[0..15]=d[0..15], sel=sel[0], out[0..15]=k);
+    Mux16(a[0..15]=v, b[0..15]=k, sel=sel[1], out[0..15]=out);
+
 }
