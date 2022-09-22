@@ -43,4 +43,37 @@ CHIP ALU {
 
     PARTS:
    // Put you code here:
+   // zx
+    Not16(in[0..15]=x[0..15], out[0..15]=notx); // negate x
+    Add16(a[0..15]=x[0..15], b[0..15]=notx, out[0..15]=addx); // add negation and x
+    Inc16(in[0..15]=addx, out[0..15]=zrx); // add 1 to negated x to zero
+    Mux16(a[0..15]=x[0..15], b[0..15]=zrx, sel=zx, out[0..15]=zxout); // choose between zero and regular x
+
+    // nx
+    Not16(in[0..15]=zxout, out[0..15]=notzxout);
+    Mux16(a[0..15]=zxout, b[0..15]=notzxout, sel=nx, out[0..15]=nxout);
+
+    // zx
+    Not16(in[0..15]=y[0..15], out[0..15]=noty);
+    Add16(a[0..15]=y[0..15], b[0..15]=noty, out[0..15]=addy);
+    Inc16(in[0..15]=addy, out[0..15]=zry);
+    
+    Mux16(a[0..15]=y[0..15], b[0..15]=zry, sel=zy, out[0..15]=zyout);
+
+    //ny
+    Not16(in[0..15]=zyout, out[0..15]=notzyout);
+    Mux16(a[0..15]=zyout, b[0..15]=notzyout, sel=ny, out[0..15]=nyout);
+
+    // f
+    // x + y
+    Add16(a[0..15]=nxout, b[0..15]=nyout, out[0..15]=addxy);
+    // x and y
+    And16(a[0..15]=nxout, b[0..15]=nyout, out[0..15]=andxy);
+
+    Mux16(a[0..15]=andxy, b[0..15]=addxy, sel=f, out[0..15]=outf);
+
+    // no
+    Not16(in[0..15]=outf, out[0..15]=negf);
+    Mux16(a[0..15]=outf, b[0..15]=negf, sel=no, out[0..15]=out);
+
 }
