@@ -42,26 +42,28 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
-   // zx
+    // zx
     Not16(in[0..15]=x[0..15], out[0..15]=notx); // negate x
     Add16(a[0..15]=x[0..15], b[0..15]=notx, out[0..15]=addx); // add negation and x
     Inc16(in[0..15]=addx, out[0..15]=zrx); // add 1 to negated x to zero
+
     Mux16(a[0..15]=x[0..15], b[0..15]=zrx, sel=zx, out[0..15]=zxout); // choose between zero and regular x
 
     // nx
     Not16(in[0..15]=zxout, out[0..15]=notzxout);
+
     Mux16(a[0..15]=zxout, b[0..15]=notzxout, sel=nx, out[0..15]=nxout);
 
     // zx
     Not16(in[0..15]=y[0..15], out[0..15]=noty);
     Add16(a[0..15]=y[0..15], b[0..15]=noty, out[0..15]=addy);
     Inc16(in[0..15]=addy, out[0..15]=zry);
-    
+
     Mux16(a[0..15]=y[0..15], b[0..15]=zry, sel=zy, out[0..15]=zyout);
 
     //ny
     Not16(in[0..15]=zyout, out[0..15]=notzyout);
+
     Mux16(a[0..15]=zyout, b[0..15]=notzyout, sel=ny, out[0..15]=nyout);
 
     // f
@@ -74,6 +76,14 @@ CHIP ALU {
 
     // no
     Not16(in[0..15]=outf, out[0..15]=negf);
-    Mux16(a[0..15]=outf, b[0..15]=negf, sel=no, out[0..15]=out);
+    // ng [contained in the output of multiplexer for negate output (we assume here no is last operation before ALU out) ]
+    Mux16(a[0..15]=outf, b[0..15]=negf, sel=no, out[0..15]=out, out[15]=ng, out[0..7]=righthalf, out[8..15]=lefthalf);
 
+    // zr
+    Or8Way(in=righthalf, out=righthalfout);
+    Or8Way(in=lefthalf, out=lefthalfout);
+    Or(a=lefthalfout, b=righthalfout, out=combinedor);
+    Not(in=combinedor, out=zr);
+
+    //it's acceptable to split input and output pins, just not internal pins of each chip.
 }
