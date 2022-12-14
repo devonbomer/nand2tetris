@@ -1,0 +1,23 @@
+
+Nand is a primitive data type for this project. It is build in and ready to use.
+Delete file or type BUILTIN to implement default chip.
+
+Order:
+Not DONE
+And DONE
+Or DONE
+XOR DONE
+Multiplexer DONE
+Demultiplexer DONE
+
+Multi-bit:
+Not DONE
+And DONE
+Or DONE
+multiplexer DONE
+
+multi-way gates:
+DMux 4-way DONE
+16-bit Mux 4-way DONE
+DMux 8-way DONE
+16-bit Mux 8-way DONE

@@ -16,5 +16,23 @@ CHIP PC {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    // 3 way OR with 2 OR gates
+    Or(a=load, b=inc, out=lori);
+    Or(a=lori, b=reset, out=loadin);
+
+    // Reset logic. Negate, add to itself, increment (complements of 2's complement):
+    Not16(in=regout, out=negout);
+    Add16(a=negout, b=regout, out=toinc);
+
+    // select to increment, between raw register and last step of zero out in reset (reset supersedes increment here)
+    Mux16(a=regout, b=toinc, sel=reset, out=incmux);
+
+    Inc16(in=incmux, out=incout);
+
+    // reset supersedes load and increment. Here we supersede load
+    Not(in=reset, out=notreset);
+    And(a=load, b=notreset, out=loadset);
+    Mux16(a=incout, b=in, sel=loadset, out=regin);
+
+    Register(in=regin, load=loadin, out=regout, out=out);
 }

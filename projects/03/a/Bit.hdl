@@ -8,11 +8,13 @@
  * If load[t] == 1 then out[t+1] = in[t]
  *                 else out does not change (out[t+1] = out[t])
  */
+// NOTE: DFF has an input from the time oscillator not specified below.
 
 CHIP Bit {
     IN in, load;
     OUT out;
 
     PARTS:
-    // Put your code here:
+        DFF(in=muxout, out=out, out=outtwo); // multiple out acceptable
+        Mux(a=outtwo, b=in, sel=load, out=muxout);
 }
