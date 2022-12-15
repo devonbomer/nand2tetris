@@ -18,7 +18,6 @@ CHIP RAM64 {
     // Select which ram to access
     DMux8Way(in=load, sel=address[0..2], a=loada, b=loadb, c=loadc, d=loadd, e=loade, f=loadf, g=loadg, h=loadh); // direct load to accessed bit
     
-    
     RAM8(in=in, load=loada, address=address[3..5], out=a);
     RAM8(in=in, load=loadb, address=address[3..5], out=b);
     RAM8(in=in, load=loadc, address=address[3..5], out=c);

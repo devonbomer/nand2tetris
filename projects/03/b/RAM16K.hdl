@@ -10,10 +10,23 @@
  * (the loaded value will be emitted to out from the next time step onward).
  */
 
+// THE RECIPE IS MODIFIED:
+// Instead of addressing 8 internal RAM devices, we're now going to address 4 RAM4k's.
+// The result is a 2-bit address for selecting which RAM4k we'd like to address with the remaining 12 bits
+// We now have almost exactly 16K registers, (4,096 x 4 = 16,384)
+// If we used 8 4K sticks, we'd have to address with 3 bits, and 32K ram, but my guess is we don't need that much ram for our architecture.
+
 CHIP RAM16K {
     IN in[16], load, address[14];
     OUT out[16];
 
-    PARTS:
-    // Put your code here:
+    PARTS:   
+    DMux4Way(in=load, sel=address[0..1], a=loada, b=loadb, c=loadc, d=loadd);
+    
+    RAM4K(in=in, load=loada, address=address[2..13], out=a);
+    RAM4K(in=in, load=loadb, address=address[2..13], out=b);
+    RAM4K(in=in, load=loadc, address=address[2..13], out=c);
+    RAM4K(in=in, load=loadd, address=address[2..13], out=d);
+    
+    Mux4Way16(a=a, b=b, c=c, d=d, sel=address[0..1], out=out);
 }
