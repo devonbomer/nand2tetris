@@ -27,5 +27,18 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    DMux4Way(in=load, sel=address[13..14], a=la, b=lb, c=lc, d=ld);
+    Or(a=la, b=lb, out=lab);
+
+    RAM16K(in=in, load=lab, address=address[0..13], out=ramout); // 14th bit only applicable to recognize address space (SCREEN)
+
+    // SCREEN 8K I/O
+    Screen(in=in, load=lc, address=address[0..12], out=screenout); // no need for higher bits after we know we're looking for something in SCREEN
+    // I suspect memory size etc was chosen specifically for the MSB to index SCREEN and nothing more with 10...
+   
+    // KBD
+    Keyboard(out=kbd);
+    
+    Mux4Way16(a=ramout, b=ramout, c=screenout, d=kbd, sel=address[13..14], out=out);
+
 }
