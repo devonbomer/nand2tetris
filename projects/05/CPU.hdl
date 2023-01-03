@@ -39,5 +39,48 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    Mux16(a=instruction, b=ALUout, sel=instruction[15], out=m1out); // if A in dest, result of ALU stored in A, instead of storing instruction in A
+
+    // A register /////////////////////////////////////////
+    //-- load logic --//
+    Not(in=instruction[15], out=nout); // A-instruction
+    And(a=instruction[15], b=instruction[5], out=adest); // or c-inst with a-dest bit
+    Or(a=nout, b=adest, out=CorA);
+
+    ARegister(in=m1out, load=CorA, out=areg, out[0..14]=addressM);
+    
+    // ALU ///////////////////////////////////////////////
+    //-- Select between A-reg or inM for ALU input y--//
+    Mux16(a=areg, b=inM, sel=instruction[12], out=m2out); // selector doesn't matter for a-instruction
+
+    ALU(x=dreg, y=m2out, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=ALUout, out=outM, zr=zr, ng=ng);
+
+    // D register
+    And(a=instruction[15], b=instruction[4], out=loadD);
+    DRegister(in=ALUout, load=loadD, out=dreg);
+
+    // PC load logic /////////////////////////////////////
+    //--Negative--//
+    And(a=ng, b=instruction[2], out=j1);
+    //--Equal to zero--//
+    And(a=zr, b=instruction[1], out=j2);
+    //--Positive--//
+    Not(in=zr, out=notzr);
+    Not(in=ng, out=notng);
+    And(a=notzr, b=notng, out=notngzr);
+    And(a=notngzr, b=instruction[0], out=j3);
+
+    Or(a=j1, b=j2, out=or1);
+    Or(a=or1, b=j3, out=or3);
+    And(a=or3, b=instruction[15], out=jump); //3 way or and c-instruction
+
+    Not(in=jump, out=notjump);
+    
+    //increment is not OR3 of load logic (if not load, increment) AND not Ainstruction
+    PC(in=areg, load=jump, inc=notjump, reset=reset, out[0..14]=pc);
+
+
+    //-- Write to memory M --//
+    And(a=instruction[15], b=instruction[3], out=writeM); // write to M if c-inst and m in dest
+
 }
