@@ -1,0 +1,24 @@
+# .DEFAULT_GOAL := generate <-- built-in phony target that specifies a single alternate target, as make only runs the top target 
+# Phony targets: .DEFAULT_GOAL(cam rim only one target at a time) .PHONY (define all targets that aren't files.)
+# .PHONY will run recipe of all targets listed regardless of whether a file name exists or what it's last modification time is 
+.PHONY: all say_hello generate clean
+
+# .Phony doesn't count as the top target, so all will still be ran
+all: say_hello generate
+
+say_hello: #target (like function name)
+	@echo "Hello World"
+
+# target: prerequisites
+#	recipe
+
+# @ sign suppresses outputing command. Still runs command
+
+generate:
+	@echo "Creating empty text files..."
+	touch file-{1..10}.txt
+
+# clean should not be placed in all, and should be ran manually
+clean:
+	@echo "Cleaning up..."
+	rm *.txt
