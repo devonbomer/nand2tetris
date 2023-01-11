@@ -1,3 +1,5 @@
+#ifndef PARSER
+#define PARSER 1
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -23,16 +25,24 @@ class Parser{
 
 
 string cleanString(string input){
-    while(input[input.length() -1] == 0x20 && input.length() > 0){ // check for space between = and last character
+
+    // search for and remove trailing comments:
+    size_t cmt = input.find('/');
+    if (cmt != string::npos){
+        input = input.substr(0, cmt);
+    }
+
+    // remove blank / tab space before and after input:
+    while((input[input.length() -1] == 0x20 || input[input.length() -1] == 0x09) && input.length() > 0){ // check for space between = and last character and tab character
         input.pop_back();
         }
-    while(input[0] == 0x20 && input.length() > 0){ // untested
+    while((input[0] == 0x20 || input[0] == 0x09) && input.length() > 0){ // untested
         input.erase(input.begin());
         }
-    while(input[input.length() - 1] == 0x0D && input.length() > 0){
+    while((input[input.length() - 1] == 0x0D || input[input.length() - 1] == 0x09) && input.length() > 0){
         input.pop_back();
     }
-    while(input[0] == 0x0D && input.length() > 0){ // untested
+    while((input[0] == 0x0D || input[0] == 0x09) && input.length() > 0){ // untested
         input.erase(input.begin());
     }
     return input;
@@ -49,39 +59,30 @@ Parser::Parser(ifstream* f){
 };
 
 type Parser::instructionType(){
-    type t;
     char firstChar = currentLine[0];
     
     if(firstChar == 0x40){          // @ sign
-        t = A_INSTRUCTION;
+        return A_INSTRUCTION;
     } else if(firstChar == 0x28){   // (
-        t = L_INSTRUCTION;
-    } else {                        //assuming no error reporting, default to C
-        t = C_INSTRUCTION;
+        return L_INSTRUCTION;
+    } else {                        
+        return C_INSTRUCTION;
     }
 
-    return t;
+    return A_INSTRUCTION;           //assuming no error reporting, default to C
 };
 
 void Parser::advance(){ 
-// setter for currentLine. skip white space, empty lines, and comments
+// setter for currentLine. skip white space, empty lines, and trailing / leading comments
     if(this->hasMoreLines == true){
         std::getline(*file, currentLine);
         // remove surrounding spaces
         this->currentLine = cleanString(currentLine); 
         char firstChar = currentLine[0];
 
-        // check if blank line: getline removes delimiter in the input so just need to check if line is empty
-        if(firstChar == 0x20 || firstChar == 0x2F || firstChar == 0x5C || firstChar == 0x0a || firstChar == 0x0D || currentLine.empty()){ // 0x20 = " " / blank space
+        // check if blank line after blanks are removed: getline removes delimiter in the input so just need to check if line is empty
+        if(firstChar == 0x20 || firstChar == 0x2F || firstChar == 0x5C || firstChar == 0x0a || firstChar == 0x0D || firstChar == 0x09 || currentLine.empty()){ // 0x20 = " " / blank space
             advance();
-        } else {    
-        cout << int(firstChar) << endl; 
-        }
-        
-        // search for and remove trailing comments:
-        size_t cmt = currentLine.find('/');
-        if (cmt != string::npos){
-            currentLine = currentLine.substr(0, cmt);
         }
 
         if(file->peek() == EOF){
@@ -94,6 +95,7 @@ void Parser::advance(){
 };
 
 string Parser::symbol(){
+    // removes parenthesis or @ from symbol instruction
     string symbol;
 
     if(currentLine[0] == '('){
@@ -105,7 +107,7 @@ string Parser::symbol(){
         return "null";
     }
 
-    return symbol;
+    return cleanString(symbol);
 }
 
 string Parser::dest(){
@@ -141,10 +143,12 @@ std::string Parser::comp(){
 
 std::string Parser::jump(){
  size_t col = currentLine.find(';');
-    if(col == string::npos){                                    // if no equal sign in instruction
+    if(col == string::npos){                                        // if no equal sign in instruction
         return "null";
     } else {
         string c = currentLine.substr(col + 1, currentLine.size()); // return up to the equal sign
         return cleanString(c);
     }
 }
+
+#endif

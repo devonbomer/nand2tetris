@@ -1,13 +1,15 @@
 #include "assembler.hpp"
 
 #define INST "_instructions" // file location of instruction set for assembler
-#define EXT ".hack" // file extension of output file
+#define TABLE "_symbols"
+#define EXT ".hack"          // file extension of output file
+#define VAR 16             // starting variable RAM space
 
 using namespace std; // TODO: remove namespace dependency
 
 int main(int argc, char** argv){
+  
   // check if file has .asm extension
-
   if(argc < 2){
     cout << "No filename given.\n";
     return 0;
@@ -15,11 +17,13 @@ int main(int argc, char** argv){
     cout << "Too many arguments specified.\n";
     return 0;
   }
+
   // TODO: make into function, arg:char *, string extension. Output: bool true if match
   const char * arg = argv[1];
   string s(arg);
   string ext;
   
+  // TODO: replace with new implementation of string
   for(int i = 4;i > 0; i--){
     ext = ext + s[s.length()-i];
   }
@@ -32,6 +36,7 @@ int main(int argc, char** argv){
   for(int i = 4; i > 0; i--){
     s.pop_back();
   }
+
   // assign .hack to output name and make a new file
   string repext = EXT;
   string outname = s + repext;
@@ -45,6 +50,35 @@ int main(int argc, char** argv){
 
   Parser parser(&in);
   Coder coder(INST);
+  symboltable symboltable(TABLE);
+
+  // PASS 1
+  int lineNumber = 0;
+
+  while (parser.hasMoreLines == true){
+    parser.advance(); // advance will skip comment and empty lines
+
+    type type = parser.instructionType();
+    if(type == A_INSTRUCTION || type == C_INSTRUCTION){ // CHECK FOR A INSTRUCTION THAT ISN'T A VARIABLE?
+      lineNumber++;
+    }
+
+    if (type == L_INSTRUCTION){
+      std::string symbol = parser.symbol();
+      char firstChar = symbol[0];
+        if(!symboltable.contains(symbol)){
+          symboltable.addEntry(symbol,lineNumber);
+        }
+      }
+  }
+  
+  // reset input filestream pointer
+  in.clear();
+  in.seekg(0);
+  parser.hasMoreLines = true;
+
+  // PASS 2
+  int RAM = VAR;
 
   while (parser.hasMoreLines == true){
     parser.advance();
@@ -53,11 +87,23 @@ int main(int argc, char** argv){
 
     if (type == A_INSTRUCTION){
       out << "0";
-      string binaryRep = std::bitset<15>(stoi(parser.symbol())).to_string(); // assume no errors in @ (like text)
-      out << binaryRep << endl;
-      // translate into binary
-    } else if (type == L_INSTRUCTION){
-      // part of advanced assembler
+      // track first digit:
+      std::string symbol = parser.symbol();
+      char firstChar = symbol[0];
+
+      if(std::isdigit(firstChar)){ // is number
+        out << std::bitset<15>(stoi(symbol)).to_string() << endl; // assume no errors in @ (like text)
+      } else { // is a variable name
+              // check symbol table for variable name, insert if not there, replace with value if key found
+          if(!symboltable.contains(symbol)){
+            symboltable.addEntry(symbol, RAM);
+            RAM++;                               // need to track available ram space for variables
+          }
+
+        out << std::bitset<15>(symboltable.getAddress(symbol)) << endl;
+        cout << symbol.length() << ":" << std::bitset<15>(symboltable.getAddress(symbol)) << endl;
+      }
+
     } else if (type == C_INSTRUCTION){
       out << "111";
 
@@ -69,7 +115,6 @@ int main(int argc, char** argv){
       out << coder.comp(parser.comp()) << coder.dest(parser.dest()) << coder.jump(parser.jump()) << endl;
     }
   }
-  
   out.close();
   in.close();
 }

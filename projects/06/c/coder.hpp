@@ -1,3 +1,5 @@
+#ifndef CODER
+#define CODER 1
 #include <bitset>
 #include <string>
 #include <iostream>
@@ -44,8 +46,7 @@ std::string Coder::dest(std::string field){
             string ln = line.substr(0,des);
 
             if (ln == field){
-                string bin = line.substr(des + 1,line.length());
-                return bin;
+                return line.substr(des + 1,line.length());
             }
         }
     }
@@ -110,12 +111,12 @@ std::string Coder::jump(std::string field){
             string ln = line.substr(0,des);
 
             if (ln == field){
-                string bin = line.substr(des + 1,line.length());
-                //cout << "bin: " << bin << endl;
-                return bin;
+                return line.substr(des + 1,line.length());
             }
         }
     }
 
     return "ERROR";
 }
+
+#endif

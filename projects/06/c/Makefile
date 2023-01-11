@@ -3,8 +3,7 @@ CC := g++
 all: assembler
 
 assembler: assembler.cpp
-	${CC} assembler.cpp -o ass
-	./ass next.asm
+	${CC} assembler.cpp -o assembler
 
 clean:
-	rm ass
+	rm assembler
